@@ -16,7 +16,8 @@ Hele siden ligger i én selvstendig fil, `pretakst-forside.html`, med Satoshi-fo
 | `assets/*.svg`, `assets/*.png` | Originalbilder fra dagens pretakst.no |
 | `tools/build.js` | Bygger `pretakst-forside.html` og `dist/pretakst-forside.artifact.html` |
 | `tools/guard.js` | Regex som stopper bygget hvis teksten nevner Norsk takst eller integrasjoner |
-| `tools/serve.js` | Lokal statisk server på port 8765 |
+| `tools/serve.js` | Statisk server (lokalt og i produksjon), port fra `PORT` eller 3000 |
+| `index.html` | Kopi av den ferdige siden, for statisk hosting |
 | `tools/shot.js` | Fullside-skjermbilder (desktop 1440 og mobil 390) via Chrome |
 | `tools/resize.js` | Lager de komprimerte bildene i `assets/web/` |
 | `forhandsvisning-*.png` | Skjermbilder av sluttresultatet |
@@ -29,7 +30,16 @@ npm run build
 npm run serve
 ```
 
-Åpne <http://localhost:8765/pretakst-forside.html>. Skjermbilder til gjennomgang lages med `npm run shots` (krever Chrome installert; `tools/shot.js` leter etter Chrome og Edge på standardplasseringer).
+Åpne <http://localhost:3000>. Skjermbilder til gjennomgang lages med `npm run shots` (krever Chrome installert; `tools/shot.js` leter etter Chrome og Edge på standardplasseringer).
+
+## Hosting (Coolify / Nixpacks)
+
+Repoet kan deployes direkte som Node-app med Nixpacks:
+
+- `npm start` kjører `tools/serve.js`, som serverer den ferdige siden på `PORT` (standard 3000). Sett «Ports Exposes» til 3000 i Coolify.
+- Nixpacks kjører `npm run build` automatisk, så siden bygges på nytt fra malen ved hver deploy.
+- `/health` svarer `ok` og kan brukes som healthcheck.
+- Alternativ: huk av «Is it a static site?» og sett Publish Directory til `/`. `index.html` i roten er identisk med `pretakst-forside.html`.
 
 Hero-videoen ble generert med Kling 3.0 pro via Higgsfield fra et stillbilde laget med Nano Banana Pro, og komprimert med ffmpeg:
 

@@ -26,6 +26,7 @@ const head = full.slice(0, headEnd), body = full.slice(headEnd);
 const fullDoc = head + '\n</head>\n<body>' + body;
 const fullPath = path.join(root, 'pretakst-forside.html');
 fs.writeFileSync(fullPath, fullDoc);
+fs.writeFileSync(path.join(root, 'index.html'), fullDoc); // same page, for static hosting
 const mb = p => (fs.statSync(p).size/1024/1024).toFixed(2)+'MB';
 console.log('wrote', fragPath, mb(fragPath));
 console.log('wrote', fullPath, mb(fullPath));
