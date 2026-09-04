@@ -1,0 +1,19 @@
+{
+  "name": "pretakst-forside",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Forslag til ny forside for pretakst.no – én selvstendig HTML-fil med innebygde fonter, bilder og hero-video.",
+  "scripts": {
+    "build": "node tools/build.js",
+    "serve": "node tools/serve.js",
+    "shots": "node tools/shot.js http://localhost:8765/pretakst-forside.html assets/gen/shots",
+    "resize": "node tools/resize.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0",
+    "sharp": "^0.35.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
