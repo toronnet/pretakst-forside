@@ -58,6 +58,8 @@
   .nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--mint);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
   .nav-links a:hover::after{transform:scaleX(1)}
   .nav .btn{height:46px;padding:0 22px}
+  .nav-cta{display:flex;align-items:center;gap:22px}
+  .nav-login{font-weight:500}
 
   /* ---------- hero ---------- */
   .hero{padding-top:clamp(40px,6vw,72px)}
@@ -194,6 +196,10 @@
   .form-note{margin-top:14px;color:rgba(255,248,240,.55);font-size:14px}
   .form-ok{display:none;padding:18px 22px;border-radius:var(--r-card);background:rgba(113,210,167,.14);border:1px solid rgba(113,210,167,.4);max-width:560px}
   .form-ok b{color:var(--teal)}
+  .lnk-light{color:var(--cream);text-decoration-color:var(--mint)}
+  .form-lead{margin:44px 0 14px;color:rgba(255,248,240,.72);font-size:15px}
+  .btn-outline{background:transparent;color:var(--cream);border:1px solid rgba(255,248,240,.35)}
+  .btn-outline:hover{background:rgba(255,248,240,.08)}
 
   /* news rows */
   .news{border-top:1px solid var(--line)}
@@ -279,7 +285,7 @@
       <a href="#pris">Pris</a>
       <a href="#aktuelt">Aktuelt</a>
     </nav>
-    <a class="btn btn-dark" href="#meld">Meld interesse</a>
+    <div class="nav-cta"><a class="nav-login" href="https://app.pretakst.no">Logg inn</a><a class="btn btn-dark" href="https://app.pretakst.no">Kom i gang</a></div>
   </div>
 </header>
 
@@ -289,7 +295,7 @@
   <section class="hero wrap">
     <div class="grid hero-top">
       <div class="hero-head">
-        <div class="status mono"><span class="live-dot" aria-hidden="true"></span>Lanseres snart · Meld interesse for tidlig tilgang</div>
+        <div class="status mono"><span class="live-dot" aria-hidden="true"></span>Tilgjengelig nå for takstmenn</div>
         <h1 class="display">
           <span class="l"><span>Du tar befaringen.</span></span>
           <span class="l"><span>Pretakst skriver rapporten.</span></span>
@@ -298,7 +304,7 @@
       <div class="hero-side">
         <p class="lede">Snakk inn det du ser mens du går gjennom boligen. Når du setter deg i bilen, ligger et utkast til tilstandsrapport klart til kontroll – sortert på bygningsdel og tilstandsgrad.</p>
         <div class="cta-row">
-          <a class="btn btn-dark" href="#meld">Meld interesse</a>
+          <a class="btn btn-dark" href="https://app.pretakst.no">Kom i gang</a>
           <a class="lnk" href="#slik">Se hvordan det fungerer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
         </div>
         <div class="trust mono">149 kr per rapport · Ingen abonnement</div>
@@ -416,19 +422,21 @@
   </section>
 
   <!-- ================= MELD INTERESSE ================= -->
-  <section class="sec sec-dark" id="meld">
+  <section class="sec sec-dark" id="kom-i-gang">
     <div class="wrap">
-      <div class="sec-head"><span class="mono">Meld interesse</span><span class="mono">Tidlig tilgang</span></div>
+      <div class="sec-head"><span class="mono">Kom i gang</span><span class="mono">Tilgjengelig nå</span></div>
       <div class="signup-text">
-        <h2 class="h-xl">Få tidlig tilgang</h2>
-        <p class="sub">Legg igjen e-postadressen din, så tar vi kontakt så snart Pretakst er klart for testing. Vær blant de første takstmennene som prøver det.</p>
+        <h2 class="h-xl">Lag din første rapport i dag</h2>
+        <p class="sub">Opprett konto og ta med Pretakst på neste befaring. Ingen abonnement, du betaler 149 kr per ferdigstilt rapport.</p>
+        <div class="cta-row"><a class="btn btn-mint" href="https://app.pretakst.no">Opprett konto</a><a class="lnk lnk-light" href="mailto:post@pretakst.no">Spørsmål? Skriv til post@pretakst.no</a></div>
+        <p class="form-lead">Vil du heller at vi tar kontakt? Legg igjen e-posten din.</p>
         <form class="form" id="form" novalidate>
           <label for="email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">E-postadresse</label>
           <input type="email" id="email" name="email" placeholder="din@epost.no" autocomplete="email" required>
-          <button class="btn btn-mint" type="submit">Meld interesse</button>
+          <button class="btn btn-dark btn-outline" type="submit">Send</button>
         </form>
-        <div class="form-ok" id="formOk"><b>Takk!</b> Vi tar kontakt så snart Pretakst er klart for testing.</div>
-        <p class="form-note">Vi bruker e-posten din kun til å kontakte deg om lanseringen.</p>
+        <div class="form-ok" id="formOk"><b>Takk!</b> Vi tar kontakt i løpet av kort tid.</div>
+        <p class="form-note">Vi bruker e-posten din kun til å ta kontakt med deg.</p>
       </div>
     </div>
   </section>
@@ -452,6 +460,7 @@
     <div class="foot-top">
       <img src="{{asset:logo-white.svg}}" alt="Pretakst">
       <nav class="foot-links" aria-label="Bunnmeny">
+        <a href="https://app.pretakst.no">Logg inn</a>
         <a href="#slik">Slik fungerer det</a>
         <a href="#pris">Pris</a>
         <a href="https://pretakst.no/kjopsbetingelser">Kjøpsbetingelser</a>

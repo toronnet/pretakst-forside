@@ -58,7 +58,8 @@ ffmpeg -i hero-original.mp4 -vf "scale=1280:-2" -c:v libx264 -preset slow -crf 2
 
 ## Før dette går live
 
-- Skjemaet «Meld interesse» er en prototype uten backend.
+- Knappene «Kom i gang», «Logg inn» og «Opprett konto» peker på https://app.pretakst.no. Juster stien hvis appen har egne sider for innlogging og registrering.
+- E-postskjemaet nederst («Vil du heller at vi tar kontakt?») er en prototype uten backend.
 - Prisen står som 149 kr uten mva-presisering.
 - Adresse, oppdragsnummer og datoer i demoen er fiktive. Bloggradene lenker til de ekte artiklene på pretakst.no.
 - Teksten skal ikke nevne Norsk takst eller integrasjoner. `tools/guard.js` håndhever dette ved bygging.
