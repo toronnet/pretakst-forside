@@ -22,7 +22,7 @@ Hele siden ligger i én selvstendig fil, `pretakst-forside.html`, med Satoshi-fo
 | `robots.txt`, `llms.txt` | For søkemotorer og språkmodeller |
 | `tools/guard.js` | Regex som stopper bygget hvis teksten nevner Norsk takst eller integrasjoner |
 | `tools/serve.js` | Statisk server (lokalt og i produksjon), port fra `PORT` eller 3000 |
-| `index.html` | Kopi av den ferdige siden, for statisk hosting |
+| `index.html` | Siden som serveres på `/`. Samme innhold som `pretakst-forside.html`, men video, fonter og bilder lenkes fra `/assets/` i stedet for å bygges inn (90 KB mot 2,3 MB) |
 | `tools/shot.js` | Fullside-skjermbilder (desktop 1440 og mobil 390) via Chrome |
 | `tools/resize.js` | Lager de komprimerte bildene i `assets/web/` |
 | `forhandsvisning-*.png` | Skjermbilder av sluttresultatet |
@@ -44,7 +44,7 @@ Repoet kan deployes direkte som Node-app med Nixpacks:
 - `npm start` kjører `tools/serve.js`, som serverer den ferdige siden på `PORT` (standard 3000). Sett «Ports Exposes» til 3000 i Coolify.
 - Nixpacks kjører `npm run build` automatisk, så siden bygges på nytt fra malen ved hver deploy.
 - `/health` svarer `ok` og kan brukes som healthcheck.
-- Alternativ: huk av «Is it a static site?» og sett Publish Directory til `/`. `index.html` i roten er identisk med `pretakst-forside.html`.
+- `serve.js` sender 301 fra `www.`, skråstrek på slutten, `/index.html` og `/pages/…` til én kanonisk URL, gzipper tekst og støtter byte-range for videoen. Statisk hosting mister dette, så bruk Node-oppsettet.
 
 Hero-videoen ble generert med Kling 3.0 pro via Higgsfield fra et stillbilde laget med Nano Banana Pro, og komprimert med ffmpeg:
 

@@ -15,19 +15,46 @@ const redirects = {
   '/blogs/byggskader-koster-milliarder---hva-kan-vi-laere-og-hvordan-kan-teknologi-hjelpe': '/blogs/byggskader-koster-milliarder---hva-kan-vi-laere-og-hvordan-kan-teknologi-hjelpe-2',
 };
 
+const zlib = require('zlib');
+const compressible = /^(text\/|application\/(xml|json)|image\/svg)/;
+
 http.createServer((req, res) => {
-  let p = decodeURIComponent(req.url.split('?')[0]);
-  if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
-  if (redirects[p]) { res.writeHead(301, { Location: redirects[p] }); return res.end(); }
-  if (p === '/') p = '/pretakst-forside.html';
+  const [rawPath, query] = req.url.split('?');
+  let p = decodeURIComponent(rawPath);
+  const qs = query ? '?' + query : '';
+  const moved = to => { res.writeHead(301, { Location: to }); res.end(); };
+  // one canonical URL per page: no www, no trailing slash, no file names for pages
+  const host = req.headers.host || '';
+  if (/^www\./i.test(host)) return moved('https://' + host.slice(4) + req.url);
+  if (p.length > 1 && p.endsWith('/')) return moved(p.slice(0, -1) + qs);
+  if (p === '/index.html' || p === '/pretakst-forside.html') return moved('/' + qs);
+  const page = p.match(/^\/pages(\/[\w/-]+)\.html$/);
+  if (page) return moved(page[1] + qs);
+  if (redirects[p]) return moved(redirects[p]);
   if (p === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
+  if (p === '/') p = '/index.html';
   // clean URLs for subpages: /kjopsbetingelser -> pages/kjopsbetingelser.html
-  if (!path.extname(p)) p = '/pages' + p + '.html';
+  else if (!path.extname(p)) p = '/pages' + p + '.html';
   const f = path.join(root, p);
   if (!allow.some(re => re.test(p)) || !f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Ikke funnet');
   }
-  const cache = p.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'public, max-age=300';
-  res.writeHead(200, { 'Content-Type': types[path.extname(f)] || 'application/octet-stream', 'Cache-Control': cache });
-  fs.createReadStream(f).pipe(res);
+  const type = types[path.extname(f)] || 'application/octet-stream';
+  const headers = { 'Content-Type': type, 'Cache-Control': p.startsWith('/assets/') ? 'public, max-age=604800' : 'public, max-age=300', Vary: 'Accept-Encoding' };
+  const size = fs.statSync(f).size;
+  // byte ranges, needed for the hero video in Safari
+  const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+  if (range && type === 'video/mp4') {
+    const start = range[1] ? +range[1] : size - +range[2], end = range[1] && range[2] ? Math.min(+range[2], size - 1) : size - 1;
+    if (start > end || start >= size) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); return res.end(); }
+    res.writeHead(206, { ...headers, 'Accept-Ranges': 'bytes', 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
+    return req.method === 'HEAD' ? res.end() : fs.createReadStream(f, { start, end }).pipe(res);
+  }
+  if (type === 'video/mp4') headers['Accept-Ranges'] = 'bytes';
+  if (compressible.test(type) && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
+    res.writeHead(200, { ...headers, 'Content-Encoding': 'gzip' });
+    return req.method === 'HEAD' ? res.end() : fs.createReadStream(f).pipe(zlib.createGzip()).pipe(res);
+  }
+  res.writeHead(200, { ...headers, 'Content-Length': size });
+  req.method === 'HEAD' ? res.end() : fs.createReadStream(f).pipe(res);
 }).listen(port, '0.0.0.0', () => console.log('pretakst-forside serving', root, 'on http://0.0.0.0:' + port));

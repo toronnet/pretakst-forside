@@ -61,8 +61,13 @@ function write(slug, meta, body) {
     let body = clean(inner(html, 'blog-content w-richtext'));
     body = body.replace(/^\s*<h1>[\s\S]*?<\/h1>/, '').replace(/<p>(<br\/?>)+/g, '<p>').replace(/<p>\s*<\/p>/g, '');
     const imgs = [...body.matchAll(/<img[^>]*src="([^"]+)"[^>]*>/g)];
+    // Webflow shows no dates; asset ids are Mongo ObjectIds whose first 8 hex digits are the upload time
+    const uploaded = [hero, ...imgs.map(m => m[1])].map(u => (u || '').match(/\/([0-9a-f]{24})_/)).filter(Boolean)
+      .map(m => new Date(parseInt(m[1].slice(0, 8), 16) * 1000).toISOString().slice(0, 10)).sort();
     for (const [n, m] of imgs.entries()) body = body.replace(m[1], await image(m[1], `${b.img}-${n + 1}`));
-    const meta = { path: `/blogs/${b.slug}`, kind: 'blog', category: b.category, title, description: lead };
+    body = body.replace(/<img alt=""/g, `<img alt="${title.replace(/"/g, '&quot;')}"`);
+    const meta = { path: `/blogs/${b.slug}`, kind: 'blog', category: b.category, title, description: lead,
+      published: uploaded[0], modified: uploaded[uploaded.length - 1] };
     if (hero) meta.image = await image(hero, b.img);
     write(b.slug, meta, `<p class="lead">${lead}</p>\n${body}`);
   }

@@ -3,15 +3,7 @@
 <head>
 <meta charset="utf-8">
 {{tracking}}<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{title}} – Pretakst</title>
-<meta name="description" content="{{description}}">
-<link rel="canonical" href="https://pretakst.no{{path}}">
-<meta property="og:type" content="{{ogType}}">
-<meta property="og:title" content="{{title}}">
-<meta property="og:description" content="{{description}}">
-<meta property="og:url" content="https://pretakst.no{{path}}">
-{{ogImage}}<link rel="icon" type="image/png" href="/assets/web/favicon-32.png">
-<link rel="apple-touch-icon" href="/assets/web/icon-256.png">
+{{seoHead}}<link rel="preload" href="/assets/fonts/Satoshi-Bold.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   @font-face{font-family:'Satoshi';src:url(/assets/fonts/Satoshi-Regular.ttf) format('truetype');font-weight:400;font-style:normal;font-display:swap}
@@ -133,7 +125,7 @@
 
 <main class="page">
   <a class="back" href="{{backHref}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>{{backLabel}}</a>
-  <span class="kicker mono">{{category}}</span>
+  <span class="kicker mono">{{kicker}}</span>
   <h1>{{title}}</h1>
   <div class="prose">
 {{content}}
