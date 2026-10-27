@@ -42,6 +42,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 `;
 const full = `<!doctype html>\n<html lang="nb">\n<head>\n<meta charset="utf-8">\n${tracking}<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="description" content="Pretakst – AI-drevet taksering for takstmenn. Snakk inn befaringen, få et utkast til tilstandsrapport klart til kontroll. 149 kr per rapport, ingen abonnement.">\n` +
+  `<link rel="canonical" href="https://pretakst.no/">\n<meta property="og:type" content="website">\n<meta property="og:title" content="Pretakst – AI-drevet taksering for takstmenn">\n` +
+  `<meta property="og:description" content="Snakk inn befaringen, få et utkast til tilstandsrapport klart til kontroll. 149 kr per rapport, ingen abonnement.">\n` +
+  `<meta property="og:url" content="https://pretakst.no/">\n<meta property="og:image" content="https://pretakst.no/assets/web/poster.jpg">\n` +
+  `<link rel="icon" type="image/png" href="/assets/web/favicon-32.png">\n<link rel="apple-touch-icon" href="/assets/web/icon-256.png">\n` +
   frag.replace(/<title>[\s\S]*?<\/title>/, m => m + '') .replace(/^(<title>.*<\/title>\s*)/, '$1') + `\n</body>\n</html>\n`;
 // move title/link/style into head, rest into body
 const headEnd = full.indexOf('</style>') + '</style>'.length;
@@ -60,6 +64,7 @@ const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, 
 const sideTpl = inline(fs.readFileSync(path.join(root, 'src', 'side.template.html'), 'utf8'));
 const sideDir = path.join(root, 'src', 'sider');
 fs.rmSync(path.join(root, 'pages'), { recursive: true, force: true });
+const sitemap = ['/'];
 for (const file of fs.readdirSync(sideDir).filter(f => f.endsWith('.html'))) {
   const src = fs.readFileSync(path.join(sideDir, file), 'utf8');
   if (banned.test(src)) { console.error('BUILD STOPPED: ' + file + ' mentions Norsk takst / integrasjon'); process.exit(1); }
@@ -70,7 +75,8 @@ for (const file of fs.readdirSync(sideDir).filter(f => f.endsWith('.html'))) {
     tracking, trackingNoscript,
     // hero image goes right after the lead paragraph
     content: meta.image ? content.replace('</p>', `</p>\n<img class="hero-img" src="${meta.image}" alt="">`) : content,
-    title: esc(meta.title), description: esc(meta.description), path: meta.path, category: esc(meta.category),
+    // search engines show ~155 characters; cut at a word boundary
+    title: esc(meta.title), description: esc(meta.description.length > 160 ? meta.description.slice(0, 155).replace(/\s+\S*$/, '') + '…' : meta.description), path: meta.path, category: esc(meta.category),
     ogType: blog ? 'article' : 'website',
     ogImage: meta.image ? `<meta property="og:image" content="https://pretakst.no${meta.image}">\n` : '',
     backHref: blog ? '/#aktuelt' : '/', backLabel: blog ? 'Alle artikler' : 'Til forsiden',
@@ -79,6 +85,10 @@ for (const file of fs.readdirSync(sideDir).filter(f => f.endsWith('.html'))) {
   const out = path.join(root, 'pages', meta.path + '.html');
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, html);
+  sitemap.push(meta.path);
   console.log('wrote', path.relative(root, out));
 }
+fs.writeFileSync(path.join(root, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  sitemap.map(p => `  <url><loc>https://pretakst.no${p}</loc></url>\n`).join('') + '</urlset>\n');
+console.log('wrote sitemap.xml');
 if (missing.length) console.log('MISSING assets (left empty):', missing);

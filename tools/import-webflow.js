@@ -34,7 +34,7 @@ function inner(html, marker) {
   return html.slice(start);
 }
 const text = s => s.replace(/<[^>]+>/g, '').replace(/‍/g, '').replace(/\s+/g, ' ').trim();
-const clean = s => s.replace(/‍/g, '').replace(/ (class|id|loading|sizes|srcset|style|animate-on-load)="[^"]*"/g, '');
+const clean = s => s.replace(/‍/g, '').replace(/https:\/\/pretakst\.no\/?\?utm_source=[\w.]+/g, '/').replace(/[?&]utm_source=[\w.]+/g, '').replace(/ (class|id|loading|sizes|srcset|style|animate-on-load)="[^"]*"/g, '');
 
 async function image(url, name) {
   const res = await fetch(url);

@@ -4,11 +4,12 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.resolve(__dirname, '..');
 const port = parseInt(process.env.PORT, 10) || 3000;
-const types = { '.html':'text/html; charset=utf-8', '.mp4':'video/mp4', '.webp':'image/webp', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.ttf':'font/ttf', '.js':'text/javascript', '.txt':'text/plain; charset=utf-8' };
+const types = { '.html':'text/html; charset=utf-8', '.mp4':'video/mp4', '.webp':'image/webp', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.ttf':'font/ttf', '.js':'text/javascript', '.txt':'text/plain; charset=utf-8', '.xml':'application/xml; charset=utf-8' };
 // Only these paths are served; everything else (tools, src, node_modules) stays private.
-const allow = [/^\/pretakst-forside\.html$/, /^\/index\.html$/, /^\/forhandsvisning-(desktop|mobil)\.png$/, /^\/assets\/web\//, /^\/assets\/fonts\/Satoshi-\w+\.ttf$/, /^\/health$/, /^\/robots\.txt$/, /^\/llms\.txt$/, /^\/pages\/[\w/-]+\.html$/];
+const allow = [/^\/pretakst-forside\.html$/, /^\/index\.html$/, /^\/forhandsvisning-(desktop|mobil)\.png$/, /^\/assets\/web\//, /^\/assets\/fonts\/Satoshi-\w+\.ttf$/, /^\/health$/, /^\/robots\.txt$/, /^\/llms\.txt$/, /^\/sitemap\.xml$/, /^\/pages\/[\w/-]+\.html$/];
 // Old URLs (Webflow site and earlier footer links) that now live elsewhere
 const redirects = {
+  '/favicon.ico': '/assets/web/favicon-32.png',
   '/policy.html': '/personvernerklaering',
   '/personvern': '/personvernerklaering',
   '/blogs/byggskader-koster-milliarder---hva-kan-vi-laere-og-hvordan-kan-teknologi-hjelpe': '/blogs/byggskader-koster-milliarder---hva-kan-vi-laere-og-hvordan-kan-teknologi-hjelpe-2',
