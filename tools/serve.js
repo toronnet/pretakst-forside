@@ -20,20 +20,28 @@ const redirects = {
 const zlib = require('zlib');
 const compressible = /^(text\/|application\/(xml|json)|image\/svg)/;
 
-// Contact form ("Vil du heller at vi tar kontakt?") -> email to post@pretakst.no via Domeneshop SMTP.
-// SMTP_USER and SMTP_PASS are set as environment variables in Coolify; without them the endpoint
-// answers 503 and the page tells the visitor to write to post@pretakst.no instead.
+// Contact form ("Vil du heller at vi tar kontakt?") -> email to post@pretakst.no.
+// With SMTP_USER and SMTP_PASS set in Coolify it sends through that account (Domeneshop by default).
+// Without them it delivers straight to the recipient's mail server (MX, port 25) with no login;
+// that needs no setup but may land in spam. If sending fails the page tells the visitor to write
+// to post@pretakst.no instead.
+const nodemailer = require('nodemailer');
 const smtp = {
   host: process.env.SMTP_HOST || 'smtp.domeneshop.no', port: parseInt(process.env.SMTP_PORT, 10) || 587,
   user: process.env.SMTP_USER, pass: process.env.SMTP_PASS,
   to: process.env.MAIL_TO || 'post@pretakst.no',
 };
 // Domeneshop usernames are often not an address (e.g. "pretakst1"); then send from the inbox itself
-smtp.from = process.env.MAIL_FROM || (/@/.test(smtp.user || '') ? smtp.user : smtp.to);
-const mailer = smtp.user && smtp.pass && require('nodemailer').createTransport({
-  host: smtp.host, port: smtp.port, secure: smtp.port === 465, auth: { user: smtp.user, pass: smtp.pass },
-  connectionTimeout: 10e3, greetingTimeout: 10e3, socketTimeout: 15e3, // never leave the visitor waiting
+smtp.from = process.env.MAIL_FROM || (/@/.test(smtp.user || '') ? smtp.user : smtp.user ? smtp.to : 'nettside@pretakst.no');
+const timeouts = { connectionTimeout: 10e3, greetingTimeout: 10e3, socketTimeout: 15e3 }; // never leave the visitor waiting
+const loginMailer = smtp.user && smtp.pass && nodemailer.createTransport({
+  host: smtp.host, port: smtp.port, secure: smtp.port === 465, auth: { user: smtp.user, pass: smtp.pass }, ...timeouts,
 });
+async function mailer() {
+  if (loginMailer) return loginMailer;
+  const mx = (await require('dns').promises.resolveMx(smtp.to.split('@')[1])).sort((a, b) => a.priority - b.priority)[0].exchange;
+  return nodemailer.createTransport({ host: mx, port: 25, secure: false, name: 'pretakst.no', tls: { rejectUnauthorized: false }, ...timeouts });
+}
 const recent = new Map(); // ip -> timestamps of recent submissions
 function contact(req, res) {
   const reply = (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
@@ -48,14 +56,14 @@ function contact(req, res) {
     const email = String(data.email || '').trim();
     if (data.website) return reply(200, { ok: true }); // honeypot filled in: a bot, pretend it worked
     if (email.length > 200 || !/^[^@\s<>"]+@[^@\s<>"]+\.[^@\s<>"]+$/.test(email)) return reply(400, { error: 'ugyldig e-post' });
-    if (!mailer) { console.error('kontakt: SMTP_USER/SMTP_PASS mangler, e-post ikke sendt'); return reply(503, { error: 'ikke konfigurert' }); }
     recent.set(ip, [...hits, now]);
     try {
-      await mailer.sendMail({
+      await (await mailer()).sendMail({
         from: `"Pretakst nettside" <${smtp.from}>`, to: smtp.to, replyTo: email,
         subject: `Ny henvendelse fra pretakst.no: ${email}`,
         text: `Noen ba om å bli kontaktet via skjemaet «Vil du heller at vi tar kontakt?» på pretakst.no.\n\nE-post: ${email}\nTidspunkt: ${new Date().toLocaleString('nb-NO', { timeZone: 'Europe/Oslo' })}\n\nSvar på denne e-posten for å svare personen direkte.`,
       });
+      console.log('kontakt: e-post sendt til', smtp.to, loginMailer ? 'via ' + smtp.host : 'direkte til MX');
       reply(200, { ok: true });
     } catch (e) {
       console.error('kontakt: sending feilet', e.message);
