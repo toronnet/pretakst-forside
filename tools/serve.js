@@ -41,7 +41,9 @@ const loginMailer = smtp.user && smtp.pass && nodemailer.createTransport({
 async function mailer() {
   if (loginMailer) return loginMailer;
   const mx = (await require('dns').promises.resolveMx(smtp.to.split('@')[1])).sort((a, b) => a.priority - b.priority)[0].exchange;
-  return nodemailer.createTransport({ host: mx, port: 25, secure: false, name: 'pretakst.no', tls: { rejectUnauthorized: false }, ...timeouts });
+  // receiving servers pause before greeting unknown senders (anti-spam); Domeneshop's pause is ~10 s
+  return nodemailer.createTransport({ host: mx, port: 25, secure: false, name: 'pretakst.no', tls: { rejectUnauthorized: false },
+    ...timeouts, greetingTimeout: 30e3, socketTimeout: 45e3 });
 }
 const recent = new Map(); // ip -> timestamps of recent submissions
 function contact(req, res) {
