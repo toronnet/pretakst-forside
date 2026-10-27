@@ -64,7 +64,7 @@ ffmpeg -i hero-original.mp4 -vf "scale=1280:-2" -c:v libx264 -preset slow -crf 2
 ## Før dette går live
 
 - Knappene «Kom i gang», «Logg inn» og «Opprett konto» peker på https://app.pretakst.no. Juster stien hvis appen har egne sider for innlogging og registrering.
-- E-postskjemaet nederst («Vil du heller at vi tar kontakt?») er en prototype uten backend.
+- E-postskjemaet nederst («Vil du heller at vi tar kontakt?») poster til `/api/kontakt` i `serve.js`, som sender en e-post til post@pretakst.no via Domeneshop SMTP. Sett `SMTP_USER` og `SMTP_PASS` (brukernavn og passord for e-postkontoen hos Domeneshop) som miljøvariabler i Coolify. Valgfritt: `SMTP_HOST` (standard smtp.domeneshop.no), `SMTP_PORT` (587), `MAIL_TO` (post@pretakst.no), `MAIL_FROM`. Uten SMTP-variablene får besøkende beskjed om å skrive til post@pretakst.no i stedet.
 - Prisen står som 149 kr uten mva-presisering.
 - Adresse, oppdragsnummer og datoer i demoen er fiktive. Bloggradene lenker til de ekte artiklene på pretakst.no.
 - Teksten skal ikke nevne Norsk takst eller integrasjoner. `tools/guard.js` håndhever dette ved bygging.

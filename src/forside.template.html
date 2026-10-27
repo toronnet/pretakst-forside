@@ -196,6 +196,10 @@
   .form-note{margin-top:14px;color:rgba(255,248,240,.55);font-size:14px}
   .form-ok{display:none;padding:18px 22px;border-radius:var(--r-card);background:rgba(113,210,167,.14);border:1px solid rgba(113,210,167,.4);max-width:560px}
   .form-ok b{color:var(--teal)}
+  .form-err{display:none;margin-top:14px;color:#FFB4A8;font-size:15px;max-width:560px}
+  .form-err a{color:var(--cream);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--mint)}
+  .form .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+  .form button[disabled]{opacity:.6;cursor:wait}
   .lnk-light{color:var(--cream);text-decoration-color:var(--mint)}
   .form-lead{margin:44px 0 14px;color:rgba(255,248,240,.72);font-size:15px}
   .btn-outline{background:transparent;color:var(--cream);border:1px solid rgba(255,248,240,.35)}
@@ -432,10 +436,12 @@
         <p class="form-lead">Vil du heller at vi tar kontakt? Legg igjen e-posten din.</p>
         <form class="form" id="form" novalidate>
           <label for="email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">E-postadresse</label>
-          <input type="email" id="email" name="email" placeholder="din@epost.no" autocomplete="email" required>
+          <input type="email" id="email" name="email" placeholder="din@epost.no" autocomplete="email" required maxlength="200">
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp">
           <button class="btn btn-dark btn-outline" type="submit">Send</button>
         </form>
-        <div class="form-ok" id="formOk"><b>Takk!</b> Vi tar kontakt i løpet av kort tid.</div>
+        <div class="form-ok" id="formOk" role="status"><b>Takk!</b> Vi tar kontakt i løpet av kort tid.</div>
+        <p class="form-err" id="formErr" role="alert">Noe gikk galt, og e-posten ble ikke sendt. Skriv til oss på <a href="mailto:post@pretakst.no">post@pretakst.no</a>, så svarer vi raskt.</p>
         <p class="form-note">Vi bruker e-posten din kun til å ta kontakt med deg.</p>
       </div>
     </div>
@@ -569,12 +575,19 @@
   }
   range.addEventListener('input', calc); calc();
 
-  /* ---- signup (prototype: no backend) ---- */
-  var form = document.getElementById('form'), email = document.getElementById('email'), ok = document.getElementById('formOk');
+  /* ---- signup: POST /api/kontakt (tools/serve.js) emails post@pretakst.no ---- */
+  var form = document.getElementById('form'), email = document.getElementById('email'), ok = document.getElementById('formOk'), err = document.getElementById('formErr');
   form.addEventListener('submit', function(e){
     e.preventDefault();
     if(!email.value || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value)){ email.focus(); email.setAttribute('aria-invalid','true'); return; }
-    form.style.display = 'none'; ok.style.display = 'block';
+    email.removeAttribute('aria-invalid'); err.style.display = 'none';
+    var btn = form.querySelector('button'); btn.disabled = true;
+    fetch('/api/kontakt', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, website: form.website.value }) })
+      .then(function(r){ if(!r.ok) throw new Error(r.status);
+        form.style.display = 'none'; ok.style.display = 'block';
+        (window.dataLayer = window.dataLayer || []).push({ event: 'generate_lead', form: 'kontakt' }); })
+      .catch(function(){ btn.disabled = false; err.style.display = 'block'; });
   });
 })();
 </script>

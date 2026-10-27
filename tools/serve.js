@@ -20,9 +20,54 @@ const redirects = {
 const zlib = require('zlib');
 const compressible = /^(text\/|application\/(xml|json)|image\/svg)/;
 
+// Contact form ("Vil du heller at vi tar kontakt?") -> email to post@pretakst.no via Domeneshop SMTP.
+// SMTP_USER and SMTP_PASS are set as environment variables in Coolify; without them the endpoint
+// answers 503 and the page tells the visitor to write to post@pretakst.no instead.
+const smtp = {
+  host: process.env.SMTP_HOST || 'smtp.domeneshop.no', port: parseInt(process.env.SMTP_PORT, 10) || 587,
+  user: process.env.SMTP_USER, pass: process.env.SMTP_PASS,
+  to: process.env.MAIL_TO || 'post@pretakst.no',
+};
+// Domeneshop usernames are often not an address (e.g. "pretakst1"); then send from the inbox itself
+smtp.from = process.env.MAIL_FROM || (/@/.test(smtp.user || '') ? smtp.user : smtp.to);
+const mailer = smtp.user && smtp.pass && require('nodemailer').createTransport({
+  host: smtp.host, port: smtp.port, secure: smtp.port === 465, auth: { user: smtp.user, pass: smtp.pass },
+  connectionTimeout: 10e3, greetingTimeout: 10e3, socketTimeout: 15e3, // never leave the visitor waiting
+});
+const recent = new Map(); // ip -> timestamps of recent submissions
+function contact(req, res) {
+  const reply = (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  const now = Date.now(), hits = (recent.get(ip) || []).filter(t => now - t < 3600e3);
+  if (hits.length >= 5) return reply(429, { error: 'for mange forsøk' });
+  let raw = '';
+  req.on('data', c => { raw += c; if (raw.length > 4096) req.destroy(); });
+  req.on('end', async () => {
+    let data;
+    try { data = JSON.parse(raw); } catch { return reply(400, { error: 'ugyldig' }); }
+    const email = String(data.email || '').trim();
+    if (data.website) return reply(200, { ok: true }); // honeypot filled in: a bot, pretend it worked
+    if (email.length > 200 || !/^[^@\s<>"]+@[^@\s<>"]+\.[^@\s<>"]+$/.test(email)) return reply(400, { error: 'ugyldig e-post' });
+    if (!mailer) { console.error('kontakt: SMTP_USER/SMTP_PASS mangler, e-post ikke sendt'); return reply(503, { error: 'ikke konfigurert' }); }
+    recent.set(ip, [...hits, now]);
+    try {
+      await mailer.sendMail({
+        from: `"Pretakst nettside" <${smtp.from}>`, to: smtp.to, replyTo: email,
+        subject: `Ny henvendelse fra pretakst.no: ${email}`,
+        text: `Noen ba om å bli kontaktet via skjemaet «Vil du heller at vi tar kontakt?» på pretakst.no.\n\nE-post: ${email}\nTidspunkt: ${new Date().toLocaleString('nb-NO', { timeZone: 'Europe/Oslo' })}\n\nSvar på denne e-posten for å svare personen direkte.`,
+      });
+      reply(200, { ok: true });
+    } catch (e) {
+      console.error('kontakt: sending feilet', e.message);
+      reply(502, { error: 'sending feilet' });
+    }
+  });
+}
+
 http.createServer((req, res) => {
   const [rawPath, query] = req.url.split('?');
-  let p = decodeURIComponent(rawPath);
+  let p;
+  try { p = decodeURIComponent(rawPath); } catch { res.writeHead(400); return res.end(); }
   const qs = query ? '?' + query : '';
   const moved = to => { res.writeHead(301, { Location: to }); res.end(); };
   // health check answers on any host (Coolify calls it from inside the container)
@@ -30,6 +75,10 @@ http.createServer((req, res) => {
   // one canonical URL per page: pretakst.no only, no trailing slash, no file names for pages
   const host = (req.headers.host || '').toLowerCase().replace(/:\d+$/, '');
   if (aliases.includes(host)) return moved('https://pretakst.no' + req.url);
+  if (p === '/api/kontakt') {
+    if (req.method !== 'POST') { res.writeHead(405, { Allow: 'POST' }); return res.end(); }
+    return contact(req, res);
+  }
   if (p.length > 1 && p.endsWith('/')) return moved(p.slice(0, -1) + qs);
   if (p === '/index.html' || p === '/pretakst-forside.html') return moved('/' + qs);
   const page = p.match(/^\/pages(\/[\w/-]+)\.html$/);
