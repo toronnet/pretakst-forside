@@ -7,6 +7,8 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 const types = { '.html':'text/html; charset=utf-8', '.mp4':'video/mp4', '.webp':'image/webp', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.ttf':'font/ttf', '.js':'text/javascript', '.txt':'text/plain; charset=utf-8', '.xml':'application/xml; charset=utf-8' };
 // Only these paths are served; everything else (tools, src, node_modules) stays private.
 const allow = [/^\/pretakst-forside\.html$/, /^\/index\.html$/, /^\/forhandsvisning-(desktop|mobil)\.png$/, /^\/assets\/web\//, /^\/assets\/fonts\/Satoshi-\w+\.ttf$/, /^\/health$/, /^\/robots\.txt$/, /^\/llms\.txt$/, /^\/sitemap\.xml$/, /^\/pages\/[\w/-]+\.html$/];
+// Other domains Coolify routes to this app; they redirect to pretakst.no
+const aliases = ['www.pretakst.no', 'pretakst.getonnet.cloud'];
 // Old URLs (Webflow site and earlier footer links) that now live elsewhere
 const redirects = {
   '/favicon.ico': '/assets/web/favicon-32.png',
@@ -23,15 +25,16 @@ http.createServer((req, res) => {
   let p = decodeURIComponent(rawPath);
   const qs = query ? '?' + query : '';
   const moved = to => { res.writeHead(301, { Location: to }); res.end(); };
-  // one canonical URL per page: no www, no trailing slash, no file names for pages
-  const host = req.headers.host || '';
-  if (/^www\./i.test(host)) return moved('https://' + host.slice(4) + req.url);
+  // health check answers on any host (Coolify calls it from inside the container)
+  if (p === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
+  // one canonical URL per page: pretakst.no only, no trailing slash, no file names for pages
+  const host = (req.headers.host || '').toLowerCase().replace(/:\d+$/, '');
+  if (aliases.includes(host)) return moved('https://pretakst.no' + req.url);
   if (p.length > 1 && p.endsWith('/')) return moved(p.slice(0, -1) + qs);
   if (p === '/index.html' || p === '/pretakst-forside.html') return moved('/' + qs);
   const page = p.match(/^\/pages(\/[\w/-]+)\.html$/);
   if (page) return moved(page[1] + qs);
   if (redirects[p]) return moved(redirects[p]);
-  if (p === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
   if (p === '/') p = '/index.html';
   // clean URLs for subpages: /kjopsbetingelser -> pages/kjopsbetingelser.html
   else if (!path.extname(p)) p = '/pages' + p + '.html';

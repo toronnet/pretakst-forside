@@ -44,7 +44,7 @@ Repoet kan deployes direkte som Node-app med Nixpacks:
 - `npm start` kjører `tools/serve.js`, som serverer den ferdige siden på `PORT` (standard 3000). Sett «Ports Exposes» til 3000 i Coolify.
 - Nixpacks kjører `npm run build` automatisk, så siden bygges på nytt fra malen ved hver deploy.
 - `/health` svarer `ok` og kan brukes som healthcheck.
-- `serve.js` sender 301 fra `www.`, skråstrek på slutten, `/index.html` og `/pages/…` til én kanonisk URL, gzipper tekst og støtter byte-range for videoen. Statisk hosting mister dette, så bruk Node-oppsettet.
+- `serve.js` sender 301 fra `www.pretakst.no` og `pretakst.getonnet.cloud`, skråstrek på slutten, `/index.html` og `/pages/…` til én kanonisk URL, gzipper tekst og støtter byte-range for videoen. Statisk hosting mister dette, så bruk Node-oppsettet.
 
 Hero-videoen ble generert med Kling 3.0 pro via Higgsfield fra et stillbilde laget med Nano Banana Pro, og komprimert med ffmpeg:
 
