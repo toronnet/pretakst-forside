@@ -60,19 +60,37 @@ function contact(req, res) {
     if (data.website) return reply(200, { ok: true }); // honeypot filled in: a bot, pretend it worked
     if (email.length > 200 || !/^[^@\s<>"]+@[^@\s<>"]+\.[^@\s<>"]+$/.test(email)) return reply(400, { error: 'ugyldig e-post' });
     recent.set(ip, [...hits, now]);
-    try {
-      await (await mailer()).sendMail({
-        from: `"Pretakst nettside" <${smtp.from}>`, to: smtp.to, replyTo: email,
-        subject: `Ny henvendelse fra pretakst.no: ${email}`,
-        text: `Noen ba om å bli kontaktet via skjemaet «Vil du heller at vi tar kontakt?» på pretakst.no.\n\nE-post: ${email}\nTidspunkt: ${new Date().toLocaleString('nb-NO', { timeZone: 'Europe/Oslo' })}\n\nSvar på denne e-posten for å svare personen direkte.`,
-      });
-      console.log('kontakt: e-post sendt til', smtp.to, loginMailer ? 'via ' + smtp.host : 'direkte til MX');
-      reply(200, { ok: true });
-    } catch (e) {
-      console.error('kontakt: sending feilet', e.message);
-      reply(502, { error: 'sending feilet' });
-    }
+    const message = {
+      from: `"Pretakst nettside" <${smtp.from}>`, to: smtp.to, replyTo: email,
+      subject: `Ny henvendelse fra pretakst.no: ${email}`,
+      text: `Noen ba om å bli kontaktet via skjemaet «Vil du heller at vi tar kontakt?» på pretakst.no.\n\nE-post: ${email}\nTidspunkt: ${new Date().toLocaleString('nb-NO', { timeZone: 'Europe/Oslo' })}\n\nSvar på denne e-posten for å svare personen direkte.`,
+    };
+    const result = await send(message, email);
+    if (result === 'sent' || result === 'queued') return reply(200, { ok: true });
+    reply(502, { error: 'sending feilet' });
   });
+}
+
+// Like a mail server: a temporary refusal (4xx, e.g. "451 IP greylisted", or a timeout) is retried
+// in the background, so the visitor can be thanked; a permanent one (5xx) is reported back.
+// The queue lives in memory, so a redeploy drops pending retries; every attempt is logged with the
+// visitor's address, so nothing is lost silently.
+const retryMinutes = [2, 5, 10, 20, 30, 60];
+async function send(message, email, attempt = 0) {
+  try {
+    await (await mailer()).sendMail(message);
+    console.log(`kontakt: e-post om ${email} sendt til ${smtp.to}`, loginMailer ? 'via ' + smtp.host : 'direkte til MX', attempt ? `(forsøk ${attempt + 1})` : '');
+    return 'sent';
+  } catch (e) {
+    const temporary = !(e.responseCode >= 500);
+    if (temporary && attempt < retryMinutes.length) {
+      console.log(`kontakt: ${email} ikke sendt ennå (${e.message}), prøver igjen om ${retryMinutes[attempt]} min`);
+      setTimeout(() => send(message, email, attempt + 1), retryMinutes[attempt] * 60e3).unref();
+      return 'queued';
+    }
+    console.error(`kontakt: GA OPP for ${email} etter ${attempt + 1} forsøk:`, e.message);
+    return 'failed';
+  }
 }
 
 http.createServer((req, res) => {
