@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+{{tracking}}<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}} – Pretakst</title>
+<meta name="description" content="{{description}}">
+<link rel="canonical" href="https://pretakst.no{{path}}">
+<meta property="og:type" content="{{ogType}}">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:url" content="https://pretakst.no{{path}}">
+{{ogImage}}<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  @font-face{font-family:'Satoshi';src:url(/assets/fonts/Satoshi-Regular.ttf) format('truetype');font-weight:400;font-style:normal;font-display:swap}
+  @font-face{font-family:'Satoshi';src:url(/assets/fonts/Satoshi-Medium.ttf) format('truetype');font-weight:500;font-style:normal;font-display:swap}
+  @font-face{font-family:'Satoshi';src:url(/assets/fonts/Satoshi-Bold.ttf) format('truetype');font-weight:700;font-style:normal;font-display:swap}
+
+  :root{
+    color-scheme:light;
+    --cream:#FFF8F0; --cream-2:#F7EEE3;
+    --green:#222F29; --green-3:#39493F;
+    --mint:#71D2A7; --teal:#78FFC1;
+    --ink:#222F29; --ink-2:#55655D; --ink-3:#8B978F;
+    --line:#E3D8C9; --line-dark:rgba(255,248,240,.16);
+    --r-img:8px;
+    --font:'Satoshi',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --max:1360px; --pad:clamp(20px,4vw,40px);
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.55;font-weight:400;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  img{max-width:100%;height:auto;display:block}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,p{margin:0}
+  h1,h2,h3{text-wrap:balance}
+  :focus-visible{outline:3px solid var(--mint);outline-offset:3px;border-radius:6px}
+
+  .wrap{max-width:var(--max);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+  .mono{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:54px;padding:0 26px;border-radius:999px;font-size:16px;font-weight:500;line-height:1;border:0;cursor:pointer;transition:transform .2s var(--ease),background-color .2s var(--ease)}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-dark{background:var(--green);color:var(--cream)}
+  .btn-dark:hover{background:var(--green-3)}
+  .btn-mint{background:var(--mint);color:var(--green)}
+  .btn-mint:hover{background:var(--teal)}
+
+  /* nav */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(255,248,240,.84);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:76px;gap:24px}
+  .nav-logo img{height:30px;width:auto}
+  .nav-links{display:flex;gap:32px;font-weight:500;font-size:16px}
+  .nav-links a{position:relative;padding:6px 0}
+  .nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--mint);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+  .nav-links a:hover::after{transform:scaleX(1)}
+  .nav .btn{height:46px;padding:0 22px}
+  .nav-cta{display:flex;align-items:center;gap:22px}
+  .nav-login{font-weight:500}
+
+  /* article */
+  .page{max-width:760px;margin:0 auto;padding:clamp(48px,7vw,96px) var(--pad) clamp(72px,9vw,120px)}
+  .back{display:inline-flex;align-items:center;gap:8px;color:var(--ink-2);margin-bottom:40px}
+  .back:hover{color:var(--ink)}
+  .back svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+  .back:hover svg{transform:translateX(-3px)}
+  .kicker{display:block;color:var(--ink-3);margin-bottom:18px}
+  .page h1{font-size:clamp(36px,5vw,56px);line-height:1.05;letter-spacing:-.03em;font-weight:700;margin-bottom:28px}
+  .prose .hero-img{margin:40px 0 48px;border:1px solid var(--line);width:100%}
+  .prose{color:var(--ink)}
+  .prose .lead{font-size:21px;line-height:1.5;color:var(--ink-2)}
+  .prose p,.prose ul,.prose ol,.prose figure{margin:0 0 20px}
+  .prose h2{font-size:28px;line-height:1.2;letter-spacing:-.02em;font-weight:700;margin:48px 0 16px}
+  .prose h3{font-size:21px;line-height:1.3;font-weight:700;margin:36px 0 12px}
+  .prose ul,.prose ol{padding-left:22px}
+  .prose li{margin-bottom:8px}
+  .prose li::marker{color:var(--mint)}
+  .prose strong{font-weight:700}
+  .prose a{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;text-decoration-color:var(--mint)}
+  .prose img{border-radius:var(--r-img);margin:32px 0}
+  .prose figure img{margin:0}
+  .prose figcaption{font-size:14px;color:var(--ink-3);margin-top:8px}
+  .prose blockquote{margin:28px 0;padding-left:20px;border-left:3px solid var(--mint);color:var(--ink-2)}
+  .prose > :first-child{margin-top:0}
+
+  /* closing CTA */
+  .cta{background:var(--green);color:var(--cream)}
+  .cta-in{display:flex;justify-content:space-between;align-items:center;gap:24px 40px;flex-wrap:wrap;padding-top:64px;padding-bottom:64px}
+  .cta h2{font-size:clamp(28px,3.4vw,40px);line-height:1.1;letter-spacing:-.025em;font-weight:700;max-width:20ch}
+  .cta p{color:rgba(255,248,240,.72);margin-top:10px}
+
+  /* footer */
+  .footer{background:var(--green);color:rgba(255,248,240,.72);border-top:1px solid var(--line-dark);padding:56px 0 40px}
+  .foot-top{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .foot-top img{height:30px;width:auto}
+  .foot-links{display:flex;gap:28px;flex-wrap:wrap;font-weight:500;font-size:15px}
+  .foot-links a:hover{color:var(--teal)}
+  .foot-bottom{display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;letter-spacing:.06em;border-top:1px solid var(--line-dark);padding-top:24px}
+  .foot-bottom a:hover{color:var(--teal)}
+  .nowrap{white-space:nowrap}
+
+  @media (max-width:760px){
+    .nav-links{display:none}
+    .nav-login{display:none}
+    .prose .lead{font-size:19px}
+    .cta .btn{width:100%}
+    .foot-top{flex-direction:column}
+    .foot-links{flex-direction:column;gap:14px}
+    .foot-bottom{flex-direction:column}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none!important}
+  }
+</style>
+</head>
+<body>
+{{trackingNoscript}}<header class="nav">
+  <div class="wrap nav-in">
+    <a class="nav-logo" href="/" aria-label="Pretakst – til forsiden"><img src="{{asset:logo.svg}}" alt="Pretakst"></a>
+    <nav class="nav-links" aria-label="Hovedmeny">
+      <a href="/#slik">Slik fungerer det</a>
+      <a href="/#rapporten">Rapporten</a>
+      <a href="/#pris">Pris</a>
+      <a href="/#aktuelt">Aktuelt</a>
+    </nav>
+    <div class="nav-cta"><a class="nav-login" href="https://app.pretakst.no">Logg inn</a><a class="btn btn-dark" href="https://app.pretakst.no">Kom i gang</a></div>
+  </div>
+</header>
+
+<main class="page">
+  <a class="back" href="{{backHref}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>{{backLabel}}</a>
+  <span class="kicker mono">{{category}}</span>
+  <h1>{{title}}</h1>
+  <div class="prose">
+{{content}}
+  </div>
+</main>
+
+<section class="cta">
+  <div class="wrap cta-in">
+    <div>
+      <h2>Lag din første rapport i dag</h2>
+      <p>Ingen abonnement. 149 kr per ferdigstilt rapport.</p>
+    </div>
+    <a class="btn btn-mint" href="https://app.pretakst.no">Opprett konto</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <img src="{{asset:logo-white.svg}}" alt="Pretakst">
+      <nav class="foot-links" aria-label="Bunnmeny">
+        <a href="https://app.pretakst.no">Logg inn</a>
+        <a href="/#slik">Slik fungerer det</a>
+        <a href="/#pris">Pris</a>
+        <a href="/kjopsbetingelser">Kjøpsbetingelser</a>
+        <a href="/personvernerklaering">Personvernerklæring</a>
+        <a href="mailto:post@pretakst.no">post@pretakst.no</a>
+      </nav>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Pretakst · Org.nr. 932&nbsp;889&nbsp;692</span>
+      <span><a href="https://www.facebook.com/profile.php?id=61555283876217">Facebook</a> · <a href="https://www.linkedin.com/company/pretakst-as/posts/?feedView=all">LinkedIn</a> · <span class="nowrap">Utviklet av <a href="https://getonnet.no/">GetOnNet&nbsp;AS</a></span></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

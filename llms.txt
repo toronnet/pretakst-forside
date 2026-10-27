@@ -23,7 +23,7 @@
 
 - [Appen (logg inn / opprett konto)](https://app.pretakst.no)
 - [Kjøpsbetingelser](https://pretakst.no/kjopsbetingelser)
-- [Personvernerklæring](https://pretakst.no/policy.html)
+- [Personvernerklæring](https://pretakst.no/personvernerklaering)
 - Kontakt: post@pretakst.no
 
 ## Blogg

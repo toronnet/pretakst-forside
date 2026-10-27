@@ -14,7 +14,12 @@ Hele siden ligger i én selvstendig fil, `pretakst-forside.html`, med Satoshi-fo
 | `assets/web/` | Komprimerte bilder (WebP/JPEG) og hero-videoen i 720p H.264 (1,1 MB) |
 | `assets/fonts/` | Satoshi 400/500/700/900 (TTF), hentet fra dagens pretakst.no |
 | `assets/*.svg`, `assets/*.png` | Originalbilder fra dagens pretakst.no |
-| `tools/build.js` | Bygger `pretakst-forside.html` og `dist/pretakst-forside.artifact.html` |
+| `tools/build.js` | Bygger `pretakst-forside.html`, `dist/pretakst-forside.artifact.html` og undersidene i `pages/` |
+| `src/sider/` | Innholdet i undersidene (bloggartikler, kjøpsbetingelser, personvernerklæring), importert fra pretakst.webflow.io |
+| `src/side.template.html` | Felles mal for undersidene |
+| `pages/` | Ferdig bygde undersider. `serve.js` gir dem rene URL-er (`/kjopsbetingelser`, `/blogs/…`) |
+| `tools/import-webflow.js` | Engangsimport av undersidene fra Webflow (tekst og bilder til `assets/web/blog/`) |
+| `robots.txt`, `llms.txt` | For søkemotorer og språkmodeller |
 | `tools/guard.js` | Regex som stopper bygget hvis teksten nevner Norsk takst eller integrasjoner |
 | `tools/serve.js` | Statisk server (lokalt og i produksjon), port fra `PORT` eller 3000 |
 | `index.html` | Kopi av den ferdige siden, for statisk hosting |

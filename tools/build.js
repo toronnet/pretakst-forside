@@ -9,12 +9,13 @@ const tpl = fs.readFileSync(path.join(root, 'src', 'forside.template.html'), 'ut
 const banned = require('./guard.js');
 if (banned.test(tpl)) { console.error('BUILD STOPPED: template mentions Norsk takst / integrasjon, which must not appear on the page'); process.exit(1); }
 const missing = [];
-const frag = tpl.replace(/\{\{asset:([^}]+)\}\}/g, (m, rel) => {
+const inline = s => s.replace(/\{\{asset:([^}]+)\}\}/g, (m, rel) => {
   const p = path.join(root, 'assets', rel);
   if (!fs.existsSync(p)) { missing.push(rel); return ''; }
   const ext = rel.split('.').pop().toLowerCase();
   return `data:${mime[ext] || 'application/octet-stream'};base64,${fs.readFileSync(p).toString('base64')}`;
 });
+const frag = inline(tpl);
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
 const fragPath = path.join(root, 'dist', 'pretakst-forside.artifact.html');
 fs.writeFileSync(fragPath, frag);
@@ -52,4 +53,32 @@ fs.writeFileSync(path.join(root, 'index.html'), fullDoc); // same page, for stat
 const mb = p => (fs.statSync(p).size/1024/1024).toFixed(2)+'MB';
 console.log('wrote', fragPath, mb(fragPath));
 console.log('wrote', fullPath, mb(fullPath));
+
+// Subpages (blog posts, terms, privacy): src/sider/*.html -> pages/<path>.html, served by tools/serve.js.
+// Each source starts with <!--{json meta}-->; the content was imported from Webflow by tools/import-webflow.js.
+const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const sideTpl = inline(fs.readFileSync(path.join(root, 'src', 'side.template.html'), 'utf8'));
+const sideDir = path.join(root, 'src', 'sider');
+fs.rmSync(path.join(root, 'pages'), { recursive: true, force: true });
+for (const file of fs.readdirSync(sideDir).filter(f => f.endsWith('.html'))) {
+  const src = fs.readFileSync(path.join(sideDir, file), 'utf8');
+  if (banned.test(src)) { console.error('BUILD STOPPED: ' + file + ' mentions Norsk takst / integrasjon'); process.exit(1); }
+  const [, json, content] = src.match(/^<!--(\{[\s\S]*?\})-->\n([\s\S]*)$/);
+  const meta = JSON.parse(json);
+  const blog = meta.kind === 'blog';
+  const vars = {
+    tracking, trackingNoscript,
+    // hero image goes right after the lead paragraph
+    content: meta.image ? content.replace('</p>', `</p>\n<img class="hero-img" src="${meta.image}" alt="">`) : content,
+    title: esc(meta.title), description: esc(meta.description), path: meta.path, category: esc(meta.category),
+    ogType: blog ? 'article' : 'website',
+    ogImage: meta.image ? `<meta property="og:image" content="https://pretakst.no${meta.image}">\n` : '',
+    backHref: blog ? '/#aktuelt' : '/', backLabel: blog ? 'Alle artikler' : 'Til forsiden',
+  };
+  const html = sideTpl.replace(/\{\{(\w+)\}\}/g, (m, k) => k in vars ? vars[k] : m);
+  const out = path.join(root, 'pages', meta.path + '.html');
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, html);
+  console.log('wrote', path.relative(root, out));
+}
 if (missing.length) console.log('MISSING assets (left empty):', missing);
