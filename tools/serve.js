@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, '..');
 const port = parseInt(process.env.PORT, 10) || 3000;
 const types = { '.html':'text/html; charset=utf-8', '.mp4':'video/mp4', '.webp':'image/webp', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.ttf':'font/ttf', '.js':'text/javascript', '.txt':'text/plain; charset=utf-8' };
 // Only these paths are served; everything else (tools, src, node_modules) stays private.
-const allow = [/^\/pretakst-forside\.html$/, /^\/index\.html$/, /^\/forhandsvisning-(desktop|mobil)\.png$/, /^\/assets\/web\//, /^\/health$/];
+const allow = [/^\/pretakst-forside\.html$/, /^\/index\.html$/, /^\/forhandsvisning-(desktop|mobil)\.png$/, /^\/assets\/web\//, /^\/health$/, /^\/robots\.txt$/, /^\/llms\.txt$/];
 
 http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);

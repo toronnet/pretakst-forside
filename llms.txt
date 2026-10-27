@@ -1,0 +1,37 @@
+# Pretakst
+
+> Pretakst er AI-drevet taksering for takstmenn og bygningssakkyndige i Norge. Takstmannen snakker inn befaringen på mobil eller nettbrett, og Pretakst lager et utkast til tilstandsrapport sortert på bygningsdel, lokasjon og tilstandsgrad (TG0–TG3), klart til kontroll. Pris: 149 kr per ferdigstilt rapport, ingen abonnement, ingen oppstartskostnad og ingen bindingstid.
+
+## Slik fungerer det
+
+1. Opprett oppdraget: skriv inn adressen og befaringsdatoen i appen.
+2. Snakk inn befaringen: snakk inn det du ser, eller legg til korte stikkord. Pretakst sorterer på bygningsdel og foreslår tilstandsgrad.
+3. Kontroller utkastet: utkastet ligger klart når befaringen er ferdig. All tekst kan endres, og du kan legge til egne kommentarer.
+4. Lagre og last ned: rapporten lagres i oversikten sammen med de andre oppdragene, klar til nedlasting.
+
+## Rapporten
+
+- Hvert punkt får bygningsdel, lokasjon (utvendig eller innvendig) og foreslått tilstandsgrad TG0–TG3. Takstmannen bestemmer den endelige graden.
+- Alle rapporter samles i en oversikt med status, ansvarlig og dato.
+
+## Pris
+
+- 149 kr per ferdigstilt rapport, samme pris uansett volum.
+- Du betaler bare for rapporter du ferdigstiller.
+
+## Lenker
+
+- [Appen (logg inn / opprett konto)](https://app.pretakst.no)
+- [Kjøpsbetingelser](https://pretakst.no/kjopsbetingelser)
+- [Personvernerklæring](https://pretakst.no/policy.html)
+- Kontakt: post@pretakst.no
+
+## Blogg
+
+- [Byggskader koster milliarder – hva kan vi lære, og hvordan kan teknologi hjelpe?](https://pretakst.no/blogs/byggskader-koster-milliarder---hva-kan-vi-laere-og-hvordan-kan-teknologi-hjelpe-2)
+- [Endring i forskrift til avhendingslova](https://pretakst.no/blogs/endring-i-forskrift-til-avhendingslova)
+- [Høststormen Amy er på vei – husk å forberede deg](https://pretakst.no/blogs/hoststormen-amy-er-pa-vei---husk-a-forberede-deg)
+
+## Om selskapet
+
+Pretakst, org.nr. 932 889 692.
