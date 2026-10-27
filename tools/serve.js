@@ -31,8 +31,9 @@ const smtp = {
   user: process.env.SMTP_USER, pass: process.env.SMTP_PASS,
   to: process.env.MAIL_TO || 'post@pretakst.no',
 };
-// Domeneshop usernames are often not an address (e.g. "pretakst1"); then send from the inbox itself
-smtp.from = process.env.MAIL_FROM || (/@/.test(smtp.user || '') ? smtp.user : smtp.user ? smtp.to : 'nettside@pretakst.no');
+// Send from the login address, else from the inbox itself: Domeneshop rejects senders on its own
+// domain that have no mailbox ("553 ... No such user here"), and its usernames are often not addresses
+smtp.from = process.env.MAIL_FROM || (/@/.test(smtp.user || '') ? smtp.user : smtp.to);
 const timeouts = { connectionTimeout: 10e3, greetingTimeout: 10e3, socketTimeout: 15e3 }; // never leave the visitor waiting
 const loginMailer = smtp.user && smtp.pass && nodemailer.createTransport({
   host: smtp.host, port: smtp.port, secure: smtp.port === 465, auth: { user: smtp.user, pass: smtp.pass }, ...timeouts,
